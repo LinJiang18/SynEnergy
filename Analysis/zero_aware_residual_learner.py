@@ -9,7 +9,7 @@ ExperimentFirst-aligned pipeline (norm space + A4 gate loss):
     -> train ZeroAwareResidualAutoencoder (A4 loss)
     -> z_a
 
-Core algorithms live in ``E4GEN/controlnet/ae/residual_learner.py``.
+Core algorithms live in ``SynEnergy/controlnet/ae/residual_learner.py``.
 This module provides Analysis paths, ``run_stage1()``, and backward-compatible re-exports.
 
 Run:
@@ -27,9 +27,9 @@ import torch
 import torch.nn as nn
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-E4GEN_ROOT = (SCRIPT_DIR / ".." / "E4GEN").resolve()
-if str(E4GEN_ROOT) not in sys.path:
-    sys.path.insert(0, str(E4GEN_ROOT))
+SYNENERGY_ROOT = (SCRIPT_DIR / ".." / "SynEnergy").resolve()
+if str(SYNENERGY_ROOT) not in sys.path:
+    sys.path.insert(0, str(SYNENERGY_ROOT))
 
 from controlnet.ae.residual_learner import (  # noqa: E402
     DEFAULT_AE_CFG,
@@ -51,9 +51,9 @@ DEFAULT_OUTPUT_DIR = SCRIPT_DIR / "Result"
 
 # Paths + Stage 1 overrides (defaults match ExperimentFirst / power_controlnet.yaml).
 CONFIG: Dict = {
-    "data_path": "../E4GEN/Data/Power/Tallahassee_seq_180_sample_10000.npy",
-    "cond_path": "../E4GEN/Data/Power/Tallahassee_seq_180_sample_10000_condition.npy",
-    "backbone_output_dir": "../E4GEN/OUTPUT/power",
+    "data_path": "../SynEnergy/Data/Power/Tallahassee_seq_180_sample_10000.npy",
+    "cond_path": "../SynEnergy/Data/Power/Tallahassee_seq_180_sample_10000_condition.npy",
+    "backbone_output_dir": "../SynEnergy/OUTPUT/power",
     "output_dir": str(DEFAULT_OUTPUT_DIR),
     "output_prefix": "Tallahassee_seq_180_sample_10000",
     "checkpoint_name": "checkpoint_zero_aware_ae.pt",

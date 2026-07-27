@@ -48,13 +48,13 @@ env/
 /Analysis/Dataset/
 /Analysis/*.csv
 
-# E4GEN generated runs and checkpoints
-/E4GEN/Checkpoint/*
-!/E4GEN/Checkpoint/.gitkeep
-/E4GEN/OUTPUT/*
-!/E4GEN/OUTPUT/.gitkeep
-/E4GEN/Baseline/Results/
-/E4GEN/Data/Test/
+# SynEnergy generated runs and checkpoints
+/SynEnergy/Checkpoint/*
+!/SynEnergy/Checkpoint/.gitkeep
+/SynEnergy/OUTPUT/*
+!/SynEnergy/OUTPUT/.gitkeep
+/SynEnergy/Baseline/Results/
+/SynEnergy/Data/Test/
 
 # Local archives / compressed data
 *.zip
