@@ -1,0 +1,13 @@
+# Pinned stack for NVIDIA driver / CUDA 12.8 (e.g. A10G on Amazon Linux).
+# Install after creating the SDForger venv:
+#   pip install -e ".[time_series]"
+#   pip install -r Bash/requirements-sdforger-cu128.txt
+#
+# Do not install pip install -e ".[vllm]" alone: it pulls torch/cu13 and breaks this stack.
+
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
+transformers>=4.45,<5
+vllm==0.10.2

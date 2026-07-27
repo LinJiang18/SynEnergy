@@ -1,0 +1,39 @@
+######################################################
+#                   MANDATORY FIELDS
+######################################################
+task_name: time_series/Tallahassee_multisample
+task_description: Multisample time series from Tallahassee (1000 trajectories × length 180, quick trial).
+created_by: E4GEN
+
+data_builder: time_series
+
+######################################################
+#                   RESERVED FIELDS
+######################################################
+data:
+  type: default
+  data_path: ${DGT_DATA_DIR}/public/time_series/Tallahassee_seq_180_sample_1000.parquet
+
+######################################################
+#                   TASK FIELDS
+######################################################
+data_params:
+  train_length: 180
+  train_samples: 1000
+  augmentation_strategy: multisample
+  train_channels:
+    - "TOY-"
+
+# sdforger args
+sdforger_params:
+  k_bit: null
+  min_outputs_to_generate: 1000
+  max_outputs_to_generate: 1000
+  inference_batch: 64
+  norms_diversity_threshold: 0 # disable diversity early-stop; final count may still be <1000 after dedup/IQR
+  embedding_type: "fica"
+  embedding_dim: auto
+  variance_explained: 0.7
+  min_windows_number: 30
+  min_windows_length: 180
+  input_tokens_precision: 4

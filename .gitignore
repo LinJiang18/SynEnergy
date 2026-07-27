@@ -1,0 +1,65 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments and local secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Large/generated ML artifacts
+*.pt
+*.pth
+*.ckpt
+*.joblib
+*.pkl
+*.pickle
+*.npy
+*.npz
+
+# Analysis outputs generated locally
+/Analysis/Result/
+/Analysis/Plot/
+/Analysis/Dataset/
+/Analysis/*.csv
+
+# E4GEN generated runs and checkpoints
+/E4GEN/Checkpoint/*
+!/E4GEN/Checkpoint/.gitkeep
+/E4GEN/OUTPUT/*
+!/E4GEN/OUTPUT/.gitkeep
+/E4GEN/Baseline/Results/
+/E4GEN/Data/Test/
+
+# Local archives / compressed data
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
