@@ -40,17 +40,25 @@ Python 3.10+ and a CUDA-enabled GPU are recommended.
 
 ## Quick Start
 
-From the package directory `SynEnergy/` (after [Setup](#setup)):
+Run the full SynEnergy pipeline from the `SynEnergy/` directory:
 
 ```bash
 bash Bash/run_power_FL1.sh
 ```
 
-The script runs all three stages with **`--heavy`** enabled (Student-t heavy-tailed diffusion noise, as in SynEnergy / HeavyDiff-style training):
+The script sequentially trains the Backbone Denoiser, trains HG-ASL and AS-Control, and generates 1,000 synthetic sequences.
 
-1. Backbone Denoiser training
-2. HG-ASL and AS-Control training
-3. Synthetic data generation
+Generated outputs are saved to:
+
+```text
+OUTPUT/power_FL1/
+```
+
+You can evaluate the generated data using [Metric_Check.ipynb](#evaluation) with:
+
+```python
+RUN_NAME = "power_FL1"
+```
 
 ---
 
@@ -64,8 +72,6 @@ cd SynEnergy
 CONFIG=Config/Extreme/power_FL.yaml
 NAME=power_FL1
 ```
-
-All diffusion commands below use **`--heavy`** (Student-t heavy-tailed noise). Keep it on for backbone training, ControlNet training, and sampling.
 
 ### Step 1: Train the Backbone Denoiser
 
