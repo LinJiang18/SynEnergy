@@ -1,9 +1,6 @@
-# SynEnergy
+# SynEnergy: Anomaly Semantic-Guided Diffusion for Synthetic Energy Data Generation
 
-**Anomaly Semantic-Guided Diffusion for Synthetic Energy Data Generation**  
-(KDD 2027 AI4S)
-
-SynEnergy is a two-stage diffusion framework for **anomaly-preserving synthetic energy data generation**.
+Official implementation of **SynEnergy**, a two-stage diffusion framework for **anomaly-preserving synthetic energy data generation**.
 
 - **HG-ASL** learns region-specific anomaly semantics from residual consumption patterns and cross-region dependencies.
 - **AS-Diff** injects the learned anomaly semantics into a diffusion Backbone Denoiser through **AS-Control**.
@@ -12,9 +9,9 @@ SynEnergy is a two-stage diffusion framework for **anomaly-preserving synthetic 
 
 ![SynEnergy framework](SynEnergy/Figures/Framework.png)
 
-## Method Summary
+## Results
 
-![Method table](SynEnergy/Figures/Table.png)
+![SynEnergy results](SynEnergy/Figures/Table.png)
 
 | Stage | Components | Role |
 |---|---|---|
@@ -53,18 +50,11 @@ The script runs:
 2. HG-ASL and AS-Control training
 3. Synthetic data generation
 
-All stages use:
-
-```text
---name power_FL1
---config_file Config/Extreme/power_FL.yaml
-```
-
 ---
 
 ## Manual Commands
 
-Run the commands from `SynEnergy/`:
+Run the following commands from `SynEnergy/`:
 
 ```bash
 cd SynEnergy
@@ -80,6 +70,7 @@ python main.py \
   --name "${NAME}" \
   --config_file "${CONFIG}" \
   --train \
+  --heavy \
   --condition
 ```
 
@@ -90,6 +81,7 @@ python main.py \
   --name "${NAME}" \
   --config_file "${CONFIG}" \
   --train \
+  --heavy \
   --controlnet \
   --condition
 ```
@@ -101,6 +93,7 @@ python main.py \
   --name "${NAME}" \
   --config_file "${CONFIG}" \
   --sample \
+  --heavy \
   --controlnet \
   --condition
 ```
@@ -116,16 +109,14 @@ Optional arguments:
 
 ## Outputs
 
-| Path | Description |
-|---|---|
-| `SynEnergy/OUTPUT/power_FL1/` | Logs, configuration snapshots, and generated data |
-| `SynEnergy/OUTPUT/power_FL1/intermediate/` | Intermediate anomaly representations and HG-ASL modules |
-| `SynEnergy/Checkpoint/power_FL1_180/` | Backbone Denoiser and AS-Control checkpoints |
+Main artifacts are written to `SynEnergy/OUTPUT/power_FL1/`. Below are the **key output files** (not an exhaustive list):
 
-Key generated files:
-
-- `generate_data_norm_power_FL1.npy`: normalized synthetic consumption sequences
-- `generate_cond_power_FL1.npy`: region condition for each generated sequence
+| File | Description |
+|------|-------------|
+| `origin_data_norm_power_FL1.npy` | Original training sequences (MinMax-normalized) |
+| `origin_data_unnorm_power_FL1.npy` | Original training sequences (denormalized, physical scale) |
+| `generate_data_norm_power_FL1.npy` | Generated synthetic sequences (MinMax-normalized) |
+| `generate_data_unnorm_power_FL1.npy` | Generated synthetic sequences (denormalized, physical scale) |
 
 ---
 
@@ -172,6 +163,24 @@ SynEnergy/
     └── Result_Analysis/
         └── Metric_Check.ipynb
 ```
+
+## Baselines
+
+We compare SynEnergy with 11 baseline methods across seven categories.
+
+| Baseline | Category | Venue | GitHub |
+|---|---|---|---|
+| TimeGAN | GAN | NeurIPS 2019 | https://github.com/AlexanderVNikitin/tsgm/blob/main/tsgm/models/timeGAN.py |
+| TimeVAE | VAE | arXiv 2021 | https://github.com/wangyz1999/timeVAE-pytorch |
+| koVAE | VAE | ICLR 2024 | https://github.com/azencot-group/KoVAE |
+| F-Flow | Flow | ICLR 2021 | https://github.com/ahmedmalaa/Fourier-flows |
+| DiffWave | Diffusion | ICLR 2021 | https://github.com/lmnt-com/diffwave |
+| Diffusion-TS | Diffusion | ICLR 2024 | https://github.com/Y-debug-sys/Diffusion-TS |
+| SDForger | LLM | NeurIPS 2025 | https://github.com/IBM/fms-dgt/tree/main/fms_dgt/public/databuilders/time_series |
+| FIDE | Extreme-Aware | NeurIPS 2024 | https://github.com/galib19/FIDE |
+| HeavyDiff | Extreme-Aware | ICLR 2025 | https://github.com/Y-debug-sys/Diffusion-TS |
+| CENTS | Electricity-Specific | arXiv 2025 | https://github.com/DAI-Lab/Cents |
+| Cond-Diff | Electricity-Specific | Energy and Buildings 2024 | https://github.com/buds-lab/energy-diffusion |
 
 ## Citation
 
