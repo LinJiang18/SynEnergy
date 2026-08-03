@@ -27,24 +27,26 @@ Official implementation of **SynEnergy**, a two-stage diffusion framework for **
 ## Setup
 
 ```bash
+conda create -n SynEnergy python=3.10 -y
+conda activate SynEnergy
 cd SynEnergy
 pip install -U pip
 pip install -r requirements.txt
 ```
 
-Python 3.10 or later is recommended. A CUDA-enabled GPU is recommended.
+Python 3.10+ and a CUDA-enabled GPU are recommended.
 
 ---
 
 ## Quick Start
 
-From the repository root:
+From the package directory `SynEnergy/` (after [Setup](#setup)):
 
 ```bash
 bash Bash/run_power_FL1.sh
 ```
 
-The script runs:
+The script runs all three stages with **`--heavy`** enabled (Student-t heavy-tailed diffusion noise, as in SynEnergy / HeavyDiff-style training):
 
 1. Backbone Denoiser training
 2. HG-ASL and AS-Control training
@@ -62,6 +64,8 @@ cd SynEnergy
 CONFIG=Config/Extreme/power_FL.yaml
 NAME=power_FL1
 ```
+
+All diffusion commands below use **`--heavy`** (Student-t heavy-tailed noise). Keep it on for backbone training, ControlNet training, and sampling.
 
 ### Step 1: Train the Backbone Denoiser
 
@@ -122,16 +126,10 @@ Main artifacts are written to `SynEnergy/OUTPUT/power_FL1/`. Below are the **key
 
 ## Evaluation
 
-Evaluation scripts are provided in:
+After `run_power_FL1.sh` finishes successfully, open `SynEnergy/Experiment/Result_Analysis/Metric_Check.ipynb` and **run all cells in order** from top to bottom. The notebook loads `origin_data` and `generate_data` from `OUTPUT/power_FL1/` (default `RUN_NAME = "power_FL1"`) and reports all metrics.
 
 ```text
 SynEnergy/Experiment/Result_Analysis/Metric_Check.ipynb
-```
-
-Set:
-
-```python
-RUN_NAME = "power_FL1"
 ```
 
 The evaluation includes:
