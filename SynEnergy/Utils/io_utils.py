@@ -30,6 +30,41 @@ def load_yaml_config(path):
         config = yaml.full_load(f)
     return config
 
+
+def resolve_pipeline_config(config: dict, controlnet: bool = False) -> dict:
+    """
+    Flatten unified FL config (backbone / stage2 sections) for runtime.
+
+    Unified files keep shared ``train`` / ``sample`` plus:
+      - ``backbone``: Stage-1 DiffusionTS model + solver
+      - ``stage2``: ControlNet model + solver + ae + controlnet pipeline knobs
+
+    Legacy flat YAML (top-level ``model`` / ``solver``) is returned unchanged.
+    """
+    if not isinstance(config, dict):
+        raise TypeError(f"config must be a dict, got {type(config)}")
+
+    if controlnet:
+        stage = config.get("stage2")
+        if stage is None:
+            return dict(config)
+        resolved = dict(config)
+        resolved["model"] = stage["model"]
+        resolved["solver"] = stage["solver"]
+        if "ae" in stage:
+            resolved["ae"] = stage["ae"]
+        if "controlnet" in stage:
+            resolved["controlnet"] = stage["controlnet"]
+        return resolved
+
+    backbone = config.get("backbone")
+    if backbone is None:
+        return dict(config)
+    resolved = dict(config)
+    resolved["model"] = backbone["model"]
+    resolved["solver"] = backbone["solver"]
+    return resolved
+
 def save_config_to_yaml(config, path):
     assert path.endswith('.yaml')
     with open(path, 'w') as f:

@@ -1,3 +1,5 @@
+# Repo root — OS, Python, env, generated artifacts; SynEnergy code tracked by default.
+
 # OS / editor
 .DS_Store
 Thumbs.db
@@ -32,7 +34,7 @@ env/
 *.tmp
 *.temp
 
-# Large/generated ML artifacts
+# Large / generated ML artifacts (training outputs, weights, arrays)
 *.pt
 *.pth
 *.ckpt
@@ -42,19 +44,27 @@ env/
 *.npy
 *.npz
 
+# Track bundled FL training data so others can run out of the box
+!/SynEnergy/Data/Power/
+!/SynEnergy/Data/Power/**
+
 # Analysis outputs generated locally
 /Analysis/Result/
 /Analysis/Plot/
 /Analysis/Dataset/
 /Analysis/*.csv
 
-# SynEnergy generated runs and checkpoints
+# SynEnergy: training runs, checkpoints, test data
 /SynEnergy/Checkpoint/*
 !/SynEnergy/Checkpoint/.gitkeep
 /SynEnergy/OUTPUT/*
 !/SynEnergy/OUTPUT/.gitkeep
 /SynEnergy/Baseline/Results/
 /SynEnergy/Data/Test/
+
+# SynEnergy: local-only paths (see also SynEnergy/.gitignore)
+/SynEnergy/Data/Data_Check.ipynb
+/SynEnergy/NYCA/
 
 # Local archives / compressed data
 *.zip

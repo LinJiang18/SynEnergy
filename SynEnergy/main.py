@@ -13,7 +13,12 @@ from Data.build_dataloader import (
     load_sample_cond,
     unnormalize_sample,
 )
-from Utils.io_utils import load_yaml_config, seed_everything, instantiate_from_config
+from Utils.io_utils import (
+    load_yaml_config,
+    resolve_pipeline_config,
+    seed_everything,
+    instantiate_from_config,
+)
 
 
 def parse_args():
@@ -114,6 +119,7 @@ def main():
     args.device = device
 
     config = load_yaml_config(args.config_file)
+    config = resolve_pipeline_config(config, controlnet=bool(args.controlnet))
     config.setdefault("model", {}).setdefault("params", {})
     config["model"]["params"]["mode"] = bool(args.train or args.controlnet)
     config["model"]["params"]["heavy"] = bool(args.heavy)
