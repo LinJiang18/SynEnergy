@@ -46,7 +46,7 @@ Run the full SynEnergy pipeline from the `SynEnergy/` directory:
 bash Bash/run_power_FL1.sh
 ```
 
-The script sequentially trains the Backbone Denoiser, trains HG-ASL and AS-Control, and generates 1,000 synthetic sequences.
+The script sequentially trains the Backbone Denoiser, trains HG-ASL and AS-Control, and generates 10,000 synthetic sequences.
 
 Generated outputs are saved to:
 
