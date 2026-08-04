@@ -189,3 +189,11 @@ We compare SynEnergy with 11 baseline methods across seven categories.
 ## Citation
 
 Citation information will be added after publication.
+
+
+## Acknowledgements
+
+We sincerely thank the authors of the following projects for making their code publicly available:
+
+- [Diffusion-TS](https://github.com/Y-debug-sys/Diffusion-TS)
+- [ControlNet](https://github.com/lllyasviel/ControlNet)
