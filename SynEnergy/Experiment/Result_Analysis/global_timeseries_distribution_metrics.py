@@ -188,7 +188,7 @@ def dist_mmd_rbf(
     max_n: int = 10000,
     random_state: int = 42,
 ) -> float:
-    """MMD with RBF kernel on flattened (T,C) vectors per sample (auxiliary)."""
+    """Squared MMD (MMD^2, biased) with RBF kernel on flattened (T,C) vectors per sample (auxiliary)."""
     ori_full = np.asarray(ori).reshape(ori.shape[0], -1).astype(np.float64)
     gen_full = np.asarray(gen).reshape(gen.shape[0], -1).astype(np.float64)
     mmds = []
@@ -218,7 +218,7 @@ def dist_mmd_rbf(
         kgg = rbf(g, g, sig)
         kog = rbf(o, g, sig)
         mmd2 = koo.mean() + kgg.mean() - 2 * kog.mean()
-        mmds.append(float(np.sqrt(max(mmd2, 0.0))))
+        mmds.append(float(max(mmd2, 0.0)))
     return float(np.mean(mmds))
 
 
@@ -247,7 +247,7 @@ def compute_distribution_distance(
     DW1_mean, DW1_max : per-step increment W1 (ramp / dynamics)
     slot_TW1_mean, slot_TW1_max : slot-pooled marginal W1 (intra-day phase)
     ACF_dist : pure autocorrelation distance (dist_acd)
-    MMD : trajectory-level RBF-MMD (auxiliary)
+    MMD : trajectory-level RBF-MMD^2 (squared; auxiliary)
 
     Legacy (optional)
     -----------------
