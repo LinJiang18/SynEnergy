@@ -9,13 +9,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from controlnet.ae.historical_info import (
-    historical_info_to_norm,
-    load_or_build_historical_info,
-)
 from Data.build_dataloader import (
     ZAwareConditionalDataset,
     load_cond_npy,
+    load_historical_info_norm,
     load_latent_npy,
     load_normalizer_from_disk,
     load_npy_or_npz_X,
@@ -129,14 +126,12 @@ def load_training_bundle(config: dict, args: Any) -> dict:
     slots_per_day = int(cn.get("slots_per_day", 6))
     baseline_norm = None
     if num_days * slots_per_day == int(seq_length):
-        historical_info = load_or_build_historical_info(
-            npy_path,
-            origin_unnorm,
-            num_days=num_days,
-            slots_per_day=slots_per_day,
-            path=cn.get("historical_info_path"),
+        historical_info_path = cn.get("historical_info_path")
+        if not historical_info_path:
+            raise ValueError("controlnet.historical_info_path is required.")
+        baseline_norm = load_historical_info_norm(
+            historical_info_path, normalizer, expected_shape=origin_unnorm.shape
         )
-        baseline_norm = historical_info_to_norm(historical_info, normalizer)
 
     return {
         "origin_norm": origin_norm,

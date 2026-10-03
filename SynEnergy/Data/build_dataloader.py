@@ -646,6 +646,18 @@ def build_stage2_dataloader(config: dict, args: Any):
     }
 
 
+def load_historical_info_norm(path, normalizer, expected_shape=None):
+    info = np.load(path).astype(np.float32)
+    if info.ndim == 2:
+        info = info[..., np.newaxis]
+    if expected_shape is not None and tuple(info.shape) != tuple(expected_shape):
+        raise ValueError(
+            f"historical info {path} has shape {info.shape}, expected {tuple(expected_shape)}"
+        )
+    flat = info.reshape(-1, info.shape[-1])
+    return normalizer.normalize(flat).reshape(info.shape).astype(np.float32)
+
+
 def load_normalizer_from_disk(output_dir):
     """Load normalizer from normalizer.joblib; returns None if file not found."""
     path = os.path.join(output_dir, "normalizer.joblib")
