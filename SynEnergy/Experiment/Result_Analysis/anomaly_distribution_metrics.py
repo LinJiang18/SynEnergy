@@ -86,6 +86,7 @@ def _standardized_residual_batch(
     *,
     cond: Optional[np.ndarray] = None,
     zone_stats: Optional[Dict[str, np.ndarray]] = None,
+    baseline: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     if zone_stats is not None:
         if cond is None:
@@ -105,6 +106,7 @@ def _standardized_residual_batch(
         eps=residual_eps,
         min_scale=min_scale,
         use_mad_consistency=use_mad_consistency,
+        baseline=baseline,
     )
     return np.asarray(data_r, dtype=np.float64)
 
@@ -260,6 +262,7 @@ def compare_anomaly_distribution(
     cond: Optional[np.ndarray] = None,
     gen_cond: Optional[np.ndarray] = None,
     cond_group_num_days: Optional[int] = None,
+    ori_baseline: Optional[np.ndarray] = None,
 ) -> Dict[str, Any]:
     """
     Compare unpaired anomaly distributions of ori and gen.
@@ -309,6 +312,7 @@ def compare_anomaly_distribution(
         use_mad_consistency,
         cond=cond,
         zone_stats=zone_stats,
+        baseline=ori_baseline,
     )
     r_gen = _standardized_residual_batch(
         gen,
@@ -357,6 +361,7 @@ def compare_anomaly_distribution_multi(
     cond: Optional[np.ndarray] = None,
     baseline_conds: Optional[Mapping[str, np.ndarray]] = None,
     cond_group_num_days: Optional[int] = None,
+    ori_baseline: Optional[np.ndarray] = None,
 ) -> Dict[str, Any]:
     """
     Compare ori against multiple generated baselines (unpaired).
@@ -393,6 +398,7 @@ def compare_anomaly_distribution_multi(
         use_mad_consistency,
         cond=cond,
         zone_stats=zone_stats,
+        baseline=ori_baseline,
     )
     feats_ori = _per_sample_features(r_ori, tau=tau)
 

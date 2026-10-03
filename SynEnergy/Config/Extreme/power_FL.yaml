@@ -195,6 +195,7 @@ stage2:
     residual_eps: 1.0e-6
     min_scale: 1.0
     use_mad_consistency: true
+    historical_info_path: ./Data/Power/Tallahassee_seq_180_sample_10000_historical_info.npy
     loss_eps: 1.0e-6
 
   solver:

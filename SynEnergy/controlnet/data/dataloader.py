@@ -9,6 +9,10 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
+from controlnet.ae.historical_info import (
+    historical_info_to_norm,
+    load_or_build_historical_info,
+)
 from Data.build_dataloader import (
     ZAwareConditionalDataset,
     load_cond_npy,
@@ -120,12 +124,27 @@ def load_training_bundle(config: dict, args: Any) -> dict:
         num_classes_per_cond=num_classes_per_cond,
     )
 
+    cn = _controlnet_cfg(config)
+    num_days = int(cn.get("num_days", 30))
+    slots_per_day = int(cn.get("slots_per_day", 6))
+    baseline_norm = None
+    if num_days * slots_per_day == int(seq_length):
+        historical_info = load_or_build_historical_info(
+            npy_path,
+            origin_unnorm,
+            num_days=num_days,
+            slots_per_day=slots_per_day,
+            path=cn.get("historical_info_path"),
+        )
+        baseline_norm = historical_info_to_norm(historical_info, normalizer)
+
     return {
         "origin_norm": origin_norm,
         "origin_unnorm": origin_unnorm,
         "cond_array": cond_array,
         "normalizer": normalizer,
         "n_samples": n_samples,
+        "baseline_norm": baseline_norm,
     }
 
 
@@ -135,10 +154,11 @@ def build_controlnet_dataloader(
     origin_norm: np.ndarray,
     cond_array: np.ndarray,
     z_array: np.ndarray,
+    baseline_norm: Optional[np.ndarray] = None,
 ) -> DataLoader:
     train_params = config["train"]["params"]
     batch_size = train_params["batch_size"]
-    dataset = ZAwareConditionalDataset(origin_norm, cond_array, z_array)
+    dataset = ZAwareConditionalDataset(origin_norm, cond_array, z_array, baseline_norm)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True)
 
 

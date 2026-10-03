@@ -114,6 +114,7 @@ class ZAwareConditionalDataset(torch.utils.data.Dataset):
         data_nlc: np.ndarray,
         cond_nc: np.ndarray,
         z_a_nd: np.ndarray,
+        baseline_nlc: Optional[np.ndarray] = None,
     ):
         x = np.asarray(data_nlc)
         cond = np.asarray(cond_nc)
@@ -132,11 +133,21 @@ class ZAwareConditionalDataset(torch.utils.data.Dataset):
         self.data = torch.from_numpy(x.astype(np.float32, copy=False)).float()
         self.cond = torch.from_numpy(cond.astype(np.int64, copy=False)).long()
         self.z_a = torch.from_numpy(z_a.astype(np.float32, copy=False)).float()
+        self.baseline = None
+        if baseline_nlc is not None:
+            baseline = np.asarray(baseline_nlc)
+            if baseline.shape != x.shape:
+                raise ValueError(
+                    "baseline shape {} must match data shape {}".format(baseline.shape, x.shape)
+                )
+            self.baseline = torch.from_numpy(baseline.astype(np.float32, copy=False)).float()
 
     def __len__(self):
         return self.data.shape[0]
 
     def __getitem__(self, idx):
+        if self.baseline is not None:
+            return self.data[idx], self.cond[idx], self.z_a[idx], self.baseline[idx]
         return self.data[idx], self.cond[idx], self.z_a[idx]
 
 

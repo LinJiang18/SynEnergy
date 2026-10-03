@@ -24,6 +24,7 @@ def run_train(config, args, model, logger) -> None:
     origin_norm = bundle["origin_norm"]
     cond_array = bundle["cond_array"]
     normalizer = bundle["normalizer"]
+    baseline_norm = bundle["baseline_norm"]
 
     ae_model, z_a, intermediates = run_ae_phase(
         data_norm=origin_norm,
@@ -32,13 +33,14 @@ def run_train(config, args, model, logger) -> None:
         device=args.device,
         logger=logger,
         output_dir=args.output_dir,
+        baseline_norm=baseline_norm,
     )
     save_intermediates(args.output_dir, ae_model, intermediates, config)
     if logger is not None:
         logger.log_info(f"Saved AE intermediates under {args.output_dir}/intermediate/")
 
     dataloader = build_controlnet_dataloader(
-        config, args, origin_norm, cond_array, z_a
+        config, args, origin_norm, cond_array, z_a, baseline_norm
     )
     trainer = ControlNetTrainer(
         config=config,

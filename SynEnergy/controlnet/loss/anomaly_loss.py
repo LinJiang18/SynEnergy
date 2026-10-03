@@ -117,6 +117,7 @@ class ControlNetAnomalyLoss(nn.Module):
         x_ori: torch.Tensor,
         cond: torch.Tensor,
         z_a: Optional[torch.Tensor] = None,
+        baseline: Optional[torch.Tensor] = None,
     ) -> Dict[str, torch.Tensor]:
         """
         x_gen, x_ori: (B, T, 1) in normalized space.
@@ -132,6 +133,7 @@ class ControlNetAnomalyLoss(nn.Module):
             cond=cond,
             zone_baseline=self.zone_baseline,
             zone_scale=self.zone_scale,
+            baseline=baseline,
         )
         cond_b = self._format_cond(cond)
 
@@ -149,6 +151,7 @@ class ControlNetAnomalyLoss(nn.Module):
                 cond=cond,
                 zone_baseline=self.zone_baseline,
                 zone_scale=self.zone_scale,
+                baseline=baseline,
             )
 
         out = self.ae(data_f_gen, weight_gen, cond_b)

@@ -113,6 +113,7 @@ def extract_standardized_residual(
     eps: float = 1e-6,
     min_scale: float = 1.0,
     use_mad_consistency: bool = True,
+    baseline: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Stable per-user standardized residual."""
     expected_len = num_days * slots_per_day
@@ -129,7 +130,15 @@ def extract_standardized_residual(
         raise ValueError(f"last dimension must be 1, got {n_features}")
 
     x = data.reshape(n_samples, num_days, slots_per_day)
-    baseline = np.median(x, axis=1, keepdims=True)
+    if baseline is None:
+        baseline = np.median(x, axis=1, keepdims=True)
+    else:
+        baseline = np.asarray(baseline, dtype=data.dtype)
+        if baseline.size != data.size:
+            raise ValueError(
+                f"baseline must match data shape {data.shape}, got {baseline.shape}"
+            )
+        baseline = baseline.reshape(n_samples, num_days, slots_per_day)
     raw_residual = x - baseline
     mad = np.median(np.abs(raw_residual), axis=1, keepdims=True)
 
@@ -188,6 +197,7 @@ def prepare_filtered_residual(
     data: np.ndarray,
     cfg: Optional[Dict] = None,
     cond: Optional[np.ndarray] = None,
+    baseline: Optional[np.ndarray] = None,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, Optional[Dict]]:
     """
     data -> data_r -> data_f, weight (soft gate), mask_hard (occurrence for eval).
@@ -226,6 +236,7 @@ def prepare_filtered_residual(
             eps=cfg["residual_eps"],
             min_scale=cfg["min_scale"],
             use_mad_consistency=cfg["use_mad_consistency"],
+            baseline=baseline,
         )
         cond_group_stats = None
 
@@ -261,6 +272,7 @@ def extract_standardized_residual_torch(
     min_scale: float = 1.0,
     use_mad_consistency: bool = True,
     detach_stats: bool = True,
+    baseline: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """Differentiable standardized residual; median/MAD detached when detach_stats=True."""
     expected_len = num_days * slots_per_day
@@ -271,7 +283,12 @@ def extract_standardized_residual_torch(
 
     n_samples = data.shape[0]
     x = data.reshape(n_samples, num_days, slots_per_day)
-    baseline = torch.median(x, dim=1, keepdim=True).values
+    if baseline is None:
+        baseline = torch.median(x, dim=1, keepdim=True).values
+    else:
+        baseline = baseline.to(device=x.device, dtype=x.dtype).reshape(
+            n_samples, num_days, slots_per_day
+        )
     if detach_stats:
         baseline = baseline.detach()
 
@@ -317,6 +334,7 @@ def filtered_residual_from_data_torch(
     cond: Optional[torch.Tensor] = None,
     zone_baseline: Optional[torch.Tensor] = None,
     zone_scale: Optional[torch.Tensor] = None,
+    baseline: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Full torch pipeline: data -> data_f, weight, mask_hard."""
     cfg = cfg or DEFAULT_AE_CFG
@@ -342,6 +360,7 @@ def filtered_residual_from_data_torch(
         min_scale=cfg["min_scale"],
         use_mad_consistency=cfg["use_mad_consistency"],
         detach_stats=detach_stats,
+        baseline=baseline,
     )
     data_f, weight = filter_residual_deviation_torch(
         data_r,
@@ -976,6 +995,7 @@ def run_ae_phase(
     device: Optional[torch.device] = None,
     logger=None,
     output_dir: Optional[Union[str, Path]] = None,
+    baseline_norm: Optional[np.ndarray] = None,
 ) -> Tuple[ZeroAwareResidualAutoencoder, np.ndarray, dict]:
     """
     Train AE on normalized data and extract z_a.
@@ -990,7 +1010,7 @@ def run_ae_phase(
         logger.log_info("ControlNet Phase AE: prepare filtered residual (norm space)")
 
     data_f, weight, mask_hard, _data_r, cond_group_stats = prepare_filtered_residual(
-        data_norm, cfg, cond=cond
+        data_norm, cfg, cond=cond, baseline=baseline_norm
     )
     cond_f = np.asarray(cond, dtype=np.float32)
     if cond_f.ndim == 1:

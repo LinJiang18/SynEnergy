@@ -119,6 +119,7 @@ def _anomaly_labels(
     *,
     cond: Optional[np.ndarray] = None,
     zone_stats: Optional[Dict] = None,
+    baseline: Optional[np.ndarray] = None,
 ) -> np.ndarray:
     """Binary labels (N, T, 1) from |standardized residual| > tau."""
     data = np.asarray(data, dtype=np.float32)
@@ -136,6 +137,7 @@ def _anomaly_labels(
             eps=residual_eps,
             min_scale=min_scale,
             use_mad_consistency=use_mad_consistency,
+            baseline=baseline,
         )
     return (np.abs(data_r) > float(tau)).astype(np.float32)
 
@@ -172,12 +174,13 @@ def _build_detection_y(
     label_cfg: Dict,
     *,
     cond: Optional[np.ndarray] = None,
+    baseline: Optional[np.ndarray] = None,
     detection_tau: float,
     detection_label: DetectionLabel,
     detection_min_normal_run: int,
 ) -> np.ndarray:
     det_cfg = {**label_cfg, "tau": float(detection_tau)}
-    point = _anomaly_labels(data, cond=cond, **det_cfg)
+    point = _anomaly_labels(data, cond=cond, baseline=baseline, **det_cfg)
     y = _detection_labels(point, detection_label=detection_label)
     if detection_label == "onset" and int(detection_min_normal_run) > 1:
         y = _filter_onset_cold_start(y, point, int(detection_min_normal_run))
@@ -540,6 +543,8 @@ def _run_fidelity_with_cache(
     det_settings: _DetectionSettings,
     ori_cond: Optional[np.ndarray] = None,
     gen_cond: Optional[np.ndarray] = None,
+    ori_baseline: Optional[np.ndarray] = None,
+    gen_baseline: Optional[np.ndarray] = None,
     max_train_windows: Optional[int],
     iterations: int,
     batch_size: int,
@@ -554,12 +559,17 @@ def _run_fidelity_with_cache(
     ori_time, _ = extract_time(ori_data)
     gen_time, _ = extract_time(generated_data)
 
-    y_ori_point = _anomaly_labels(ori_data, cond=ori_cond, **label_cfg)
-    y_gen_point = _anomaly_labels(generated_data, cond=gen_cond, **label_cfg)
+    y_ori_point = _anomaly_labels(
+        ori_data, cond=ori_cond, baseline=ori_baseline, **label_cfg
+    )
+    y_gen_point = _anomaly_labels(
+        generated_data, cond=gen_cond, baseline=gen_baseline, **label_cfg
+    )
     y_ori_det = _build_detection_y(
         ori_data,
         label_cfg,
         cond=ori_cond,
+        baseline=ori_baseline,
         detection_tau=det_settings.detection_tau,
         detection_label=det_settings.detection_label,
         detection_min_normal_run=det_settings.detection_min_normal_run,
@@ -568,6 +578,7 @@ def _run_fidelity_with_cache(
         generated_data,
         label_cfg,
         cond=gen_cond,
+        baseline=gen_baseline,
         detection_tau=det_settings.detection_tau,
         detection_label=det_settings.detection_label,
         detection_min_normal_run=det_settings.detection_min_normal_run,
@@ -928,6 +939,7 @@ def downstream_summary_table(
     cond: Optional[np.ndarray] = None,
     baseline_conds: Optional[Mapping[str, np.ndarray]] = None,
     cond_group_num_days: Optional[int] = None,
+    ori_baseline: Optional[np.ndarray] = None,
 ) -> "pd.DataFrame":
     """Per-group table: oracle + gen baselines; columns = Det-PRAUC, Pred-PRAUC.
 
@@ -984,11 +996,14 @@ def downstream_summary_table(
         detection_lookback=detection_lookback,
         detection_min_normal_run=detection_min_normal_run,
     )
-    y_ori_point = _anomaly_labels(ori_data, cond=cond, **label_cfg)
+    y_ori_point = _anomaly_labels(
+        ori_data, cond=cond, baseline=ori_baseline, **label_cfg
+    )
     y_ori_det = _build_detection_y(
         ori_data,
         label_cfg,
         cond=cond,
+        baseline=ori_baseline,
         detection_tau=det_settings.detection_tau,
         detection_label=det_settings.detection_label,
         detection_min_normal_run=det_settings.detection_min_normal_run,
@@ -1030,6 +1045,8 @@ def downstream_summary_table(
         train_source="ori",
         ori_cond=cond,
         gen_cond=cond,
+        ori_baseline=ori_baseline,
+        gen_baseline=ori_baseline,
         **run_kw
     )
 
@@ -1062,6 +1079,7 @@ def downstream_summary_table(
             train_source="gen",
             ori_cond=cond,
             gen_cond=gen_cond,
+            ori_baseline=ori_baseline,
             seed=seed + 100 * (i + 1),
             **{k: v for k, v in run_kw.items() if k != "seed"},
         )

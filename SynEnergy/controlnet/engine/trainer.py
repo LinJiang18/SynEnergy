@@ -231,10 +231,12 @@ class ControlNetTrainer:
                 total_w_zero = 0.0
 
                 for _ in range(self.gradient_accumulate_every):
-                    data, cond, z_a = next(self.dl)
+                    batch = next(self.dl)
+                    data, cond, z_a = batch[:3]
                     data = data.to(device)
                     cond = cond.to(device)
                     z_a = z_a.to(device)
+                    baseline = batch[3].to(device) if len(batch) > 3 else None
 
                     if self.use_aux_loss:
                         diff_loss, x0_pred = self.model(
@@ -245,6 +247,7 @@ class ControlNetTrainer:
                             x_ori=data.detach(),
                             cond=cond,
                             z_a=z_a if self.lambda_z > 0.0 else None,
+                            baseline=baseline,
                         )
                         loss = self._combine_loss(diff_loss, loss_terms)
                     else:
